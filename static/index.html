@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #card-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 20px;
+            gap: 16px;
+        }
+        .card {
+            position: relative;
+            flex: 0 0 200px;
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card .version {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .card .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 8px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+        }
+        .card .overlay .username {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Static Page</h1>
+    <p>This is a simple static HTML page.</p>
+    <div id="card-container"></div>
+    <script>
+        // Fetch model data and render cards
+        fetch('/api/models')
+          .then(response => response.json())
+          .then(models => {
+            const container = document.getElementById('card-container');
+            models.forEach(item => {
+              const card = document.createElement('div');
+              card.className = 'card';
+              // Image
+              const img = document.createElement('img');
+              img.src = item.imgUrl;
+              img.alt = item.title;
+              card.appendChild(img);
+              // Version badge
+              const version = document.createElement('div');
+              version.className = 'version';
+              version.textContent = item.version;
+              card.appendChild(version);
+              // Overlay with username and title
+              const overlay = document.createElement('div');
+              overlay.className = 'overlay';
+              const username = document.createElement('div');
+              username.className = 'username';
+              username.textContent = item.description; // using description as username
+              const title = document.createElement('div');
+              title.className = 'title';
+              title.textContent = item.title;
+              overlay.appendChild(username);
+              overlay.appendChild(title);
+              card.appendChild(overlay);
+              container.appendChild(card);
+            });
+          })
+          .catch(err => console.error('Error loading models:', err));
+    </script>
+</body>
+</html>
