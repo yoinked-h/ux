@@ -195,8 +195,14 @@
                 
                 <div class="model-content">
                     <div class="main-content">
-                        <img src="${model.image_url}" alt="${model.title}" class="model-image large"
-                             onerror="this.src='https://via.placeholder.com/600x300?text=No+Image'">
+                        <div class="image-carousel">
+                            <img id="carouselImage" src="${(model.images && model.images.length) ? model.images[0] : model.image_url}" alt="${model.title}" class="carousel-image"
+                                 onerror="this.src='https://via.placeholder.com/600x300?text=No+Image'">
+                            ${model.images && model.images.length > 1 ? `
+                            <button class="carousel-btn prev" id="prevBtn">&#10094;</button>
+                            <button class="carousel-btn next" id="nextBtn">&#10095;</button>
+                            ` : ''}
+                        </div>
                         <div class="description-content">
                             ${descriptionHtml}
                         </div>
@@ -412,6 +418,46 @@
                 alert('Failed to submit your review. Please try again later.');
             }
         }
+
+        // Image carousel functionality
+        let carouselImages = [];
+        let carouselIndex = 0;
+        let carouselInterval;
+
+        function initCarousel(images) {
+            carouselImages = images;
+            carouselIndex = 0;
+            const imgEl = document.getElementById('carouselImage');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            if (prevBtn) prevBtn.addEventListener('click', () => { showImage(carouselIndex - 1); resetInterval(); });
+            if (nextBtn) nextBtn.addEventListener('click', () => { showImage(carouselIndex + 1); resetInterval(); });
+            showImage(0);
+            carouselInterval = setInterval(() => { showImage(carouselIndex + 1); }, 5000);
+        }
+
+        function showImage(index) {
+            if (!carouselImages.length) return;
+            carouselIndex = (index + carouselImages.length) % carouselImages.length;
+            const imgEl = document.getElementById('carouselImage');
+            imgEl.src = carouselImages[carouselIndex] || imgEl.src;
+            imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/600x300?text=No+Image'; };
+        }
+
+        function resetInterval() {
+            clearInterval(carouselInterval);
+            carouselInterval = setInterval(() => { showImage(carouselIndex + 1); }, 5000);
+        }
+
+        // Integrate carousel after details load
+        const originalDisplay = displayModelDetails;
+        displayModelDetails = function(model) {
+            originalDisplay(model);
+            const imgs = model.images && model.images.length ? model.images : [model.image_url];
+            if (imgs.length > 1) {
+                initCarousel(imgs);
+            }
+        };
         
         // Error handling
         function showError(message) {

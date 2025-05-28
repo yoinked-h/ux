@@ -74,13 +74,29 @@
     "subtype": "B.1",
     "uploader_id": "user3",
     "upload_date": 1737763200,
-    "views": 2100,
+    "views": 2101,
     "downloads": 580,
     "rating": 4.9,
     "tags": [
       "nlp",
       "text",
       "summarization"
+    ],
+    "description_html": "<h2>Text Summarizer Pro</h2>\n<p>Advanced natural language processing model for intelligent text summarization.</p>\n<h3>Key Benefits</h3>\n<ol>\n<li><strong>Fast processing</strong> - Summarizes documents in seconds</li>\n<li><strong>High accuracy</strong> - Maintains context and key information</li>\n<li><strong>Multi-format support</strong> - Works with various document types</li>\n</ol>\n<blockquote>\n<p>\"This is the best summarization model I've used!\" - <em>Happy User</em></p>\n</blockquote>\n<h4>Technical Specifications</h4>\n<ul>\n<li>Model size: 1.2B parameters</li>\n<li>Input limit: 10,000 tokens</li>\n<li>Languages: 50+</li>\n</ul>\n<pre><code class=\"language-bash\">pip install text-summarizer-pro\n</code></pre>",
+    "uploader_username": "nlpguru",
+    "uploader_avatar": "https://picsum.photos/100/100?random=12",
+    "comments": [
+      {
+        "id": "comment3",
+        "model_id": "3",
+        "user_id": "user1",
+        "comment": "## Best text summarization model I've used!\n\n*Highly recommended!* The accuracy is outstanding.\n\n> The summaries are concise yet comprehensive - exactly what I needed for my research project.\n\n**Rating breakdown:**\n- Accuracy: 5/5\n- Speed: 5/5\n- Ease of use: 5/5",
+        "rating": 5,
+        "date": 1737763200,
+        "username": "aicrafter",
+        "avatar_url": "https://picsum.photos/100/100?random=10",
+        "comment_html": "<h2>Best text summarization model I've used!</h2>\n<p><em>Highly recommended!</em> The accuracy is outstanding.</p>\n<blockquote>\n<p>The summaries are concise yet comprehensive - exactly what I needed for my research project.</p>\n</blockquote>\n<p><strong>Rating breakdown:</strong><br />\n- Accuracy: 5/5<br />\n- Speed: 5/5<br />\n- Ease of use: 5/5</p>"
+      }
     ]
   },
   {
@@ -93,13 +109,29 @@
     "subtype": "B.final",
     "uploader_id": "user1",
     "upload_date": 1737676800,
-    "views": 3200,
+    "views": 3209,
     "downloads": 920,
     "rating": 4.8,
     "tags": [
       "language",
       "conversation",
       "multilingual"
+    ],
+    "description_html": "<p>The most advanced conversational AI model with multi-language support</p>",
+    "uploader_username": "aicrafter",
+    "uploader_avatar": "https://picsum.photos/100/100?random=10",
+    "comments": [
+      {
+        "id": "comment4",
+        "model_id": "4",
+        "user_id": "user2",
+        "comment": "Impressive language capabilities across multiple languages.",
+        "rating": 5,
+        "date": 1737676800,
+        "username": "modelmaster",
+        "avatar_url": "https://picsum.photos/100/100?random=11",
+        "comment_html": "<p>Impressive language capabilities across multiple languages.</p>"
+      }
     ]
   },
   {
