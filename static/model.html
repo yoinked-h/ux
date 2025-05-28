@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Details - AI Model Hub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo" onclick="goHome()">🤖 AI Model Hub</div>
+                <div class="nav-buttons">
+                    <a href="home.html" class="btn btn-secondary">🏠 Home</a>
+                    <a href="search.html" class="btn btn-secondary">🔍 Search</a>
+                    <button id="loginBtn" class="btn btn-primary" onclick="goToSearch()">Login</button>
+                    <button id="registerBtn" class="btn btn-secondary" onclick="goToSearch()">Register</button>
+                    <button id="uploadBtn" class="btn btn-primary hidden" onclick="goToSearch()">Upload Model</button>
+                    <button id="logoutBtn" class="btn btn-secondary hidden" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Model Details -->
+    <main class="container">
+        <div id="modelDetails" class="model-details">
+            <div class="loading">Loading model details...</div>
+        </div>
+
+        <!-- Comments Section -->
+        <div id="commentsSection" class="comments-section hidden">
+            <div class="comments-header">
+                <h3 class="comments-title">💬 Comments & Reviews</h3>
+            </div>
+            
+            <div id="commentForm" class="comment-form hidden">
+                <h4 class="mb-1">Add your review</h4>
+                <form onsubmit="submitComment(event)">
+                    <div class="form-group">
+                        <label>Rating:</label>
+                        <div class="rating-input">
+                            <span class="star" data-rating="1">⭐</span>
+                            <span class="star" data-rating="2">⭐</span>
+                            <span class="star" data-rating="3">⭐</span>
+                            <span class="star" data-rating="4">⭐</span>
+                            <span class="star" data-rating="5">⭐</span>
+                            <span class="ml-1 text-gray" id="ratingText">Select a rating</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="commentText">Comment:</label>
+                        <textarea id="commentText" placeholder="Share your thoughts about this model..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </form>
+            </div>
+            
+            <div id="commentsList" class="comments-list">
+                <div class="loading">Loading comments...</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentUser = null;
+        let currentModel = null;
+        let selectedRating = 0;
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthState();
+            loadModelDetails();
+            setupRatingStars();
+        });
+        
+        // Get model ID from URL parameters
+        function getModelId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+        
+        // Navigation
+        function goHome() {
+            window.location.href = 'home.html';
+        }
+        
+        function goToSearch() {
+            window.location.href = 'search.html';
+        }
+        
+        // Authentication state management
+        async function checkAuthState() {
+            try {
+                const response = await fetch('/api/current-user');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    updateUIForLoggedInUser();
+                } else {
+                    updateUIForLoggedOutUser();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                updateUIForLoggedOutUser();
+            }
+        }
+        
+        function updateUIForLoggedInUser() {
+            document.getElementById('loginBtn').classList.add('hidden');
+            document.getElementById('registerBtn').classList.add('hidden');
+            document.getElementById('uploadBtn').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            
+            // Show comment form
+            document.getElementById('commentForm').classList.remove('hidden');
+        }
+        
+        function updateUIForLoggedOutUser() {
+            document.getElementById('loginBtn').classList.remove('hidden');
+            document.getElementById('registerBtn').classList.remove('hidden');
+            document.getElementById('uploadBtn').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            
+            // Hide comment form
+            document.getElementById('commentForm').classList.add('hidden');
+        }
+        
+        // Load model details
+        async function loadModelDetails() {
+            const modelId = getModelId();
+            if (!modelId) {
+                showError('No model ID provided');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/models/${modelId}`);
+                if (!response.ok) {
+                    throw new Error('Model not found');
+                }
+                
+                currentModel = await response.json();
+                displayModelDetails(currentModel);
+                displayComments(currentModel.comments || []);
+                document.getElementById('commentsSection').classList.remove('hidden');
+            } catch (error) {
+                console.error('Failed to load model:', error);
+                showError('Failed to load model details');
+            }
+        }
+          // Display model details
+        function displayModelDetails(model) {
+            const container = document.getElementById('modelDetails');
+            
+            // Use server-rendered HTML description if available, fallback to plain text
+            const descriptionHtml = model.description_html || escapeHtml(model.description || 'No description available.');
+            
+            // Format upload date
+            const uploadDate = new Date(model.upload_date * 1000).toLocaleDateString();
+            
+            container.innerHTML = `
+                <div class="model-header">
+                    <h1 class="model-title">${model.title}</h1>
+                    <div class="model-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">Type</div>
+                            <div class="meta-value">${model.type}.${model.subtype}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Rating</div>
+                            <div class="meta-value">⭐ ${model.rating || 0}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Views</div>
+                            <div class="meta-value">👁️ ${model.views || 0}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Downloads</div>
+                            <div class="meta-value">📥 ${model.downloads || 0}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Uploaded</div>
+                            <div class="meta-value">${uploadDate}</div>
+                        </div>
+                    </div>
+                    <div class="model-actions">
+                        <a href="${model.model_link}" target="_blank" class="btn btn-success" onclick="trackDownload('${model.id}')">
+                            📥 Download Model
+                        </a>
+                        <button class="btn btn-secondary" onclick="shareModel()">🔗 Share</button>
+                    </div>
+                </div>
+                
+                <div class="model-content">
+                    <div class="main-content">
+                        <img src="${model.image_url}" alt="${model.title}" class="model-image large"
+                             onerror="this.src='https://via.placeholder.com/600x300?text=No+Image'">
+                        <div class="description-content">
+                            ${descriptionHtml}
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar">
+                        <div class="uploader-info">
+                            <img src="${model.uploader_avatar || 'https://via.placeholder.com/60x60'}" 
+                                 alt="${model.uploader_username}" class="uploader-avatar"
+                                 onerror="this.src='https://via.placeholder.com/60x60'">
+                            <div class="uploader-details">
+                                <h4>${model.uploader_username || 'Unknown User'}</h4>
+                                <div class="uploader-bio">Model creator</div>
+                            </div>
+                        </div>
+                        
+                        <div class="model-stats">
+                            <h4 class="mb-1 text-dark">📊 Statistics</h4>
+                            <div class="stat-grid">
+                                <div class="stat-item">
+                                    <span class="stat-number">${model.views || 0}</span>
+                                    <div class="stat-label">Views</div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">${model.downloads || 0}</span>
+                                    <div class="stat-label">Downloads</div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">${model.rating || 0}</span>
+                                    <div class="stat-label">Rating</div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">${(model.comments || []).length}</span>
+                                    <div class="stat-label">Reviews</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${model.tags && model.tags.length > 0 ? `
+                        <div class="tags-section">
+                            <h4 class="mb-1 text-dark">🏷️ Tags</h4>
+                            <div class="tags-list">
+                                ${model.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+          // Basic HTML escaping for safety
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Display comments
+        function displayComments(comments) {
+            const container = document.getElementById('commentsList');
+            
+            if (comments.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #666; padding: 2rem;">No reviews yet. Be the first to review this model!</div>';
+                return;
+            }
+            
+            container.innerHTML = comments.map(comment => {
+                const commentDate = new Date(comment.date * 1000).toLocaleDateString();
+                const stars = '⭐'.repeat(comment.rating || 0);
+                
+                return `
+                    <div class="comment">
+                        <div class="comment-header">
+                            <div class="comment-author">
+                                <img src="${comment.avatar_url || 'https://via.placeholder.com/40x40'}" 
+                                     alt="${comment.username}" class="comment-avatar"
+                                     onerror="this.src='https://via.placeholder.com/40x40'">
+                                <div>
+                                    <div class="comment-username">${comment.username || 'Anonymous'}</div>
+                                    <div class="comment-date">${commentDate}</div>
+                                </div>
+                            </div>
+                            ${comment.rating > 0 ? `
+                            <div class="comment-rating">
+                                ${stars} ${comment.rating}
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div class="comment-text">${comment.comment_html || escapeHtml(comment.comment)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Setup rating stars
+        function setupRatingStars() {
+            const stars = document.querySelectorAll('.star');
+            
+            stars.forEach((star, index) => {
+                star.addEventListener('click', function() {
+                    selectedRating = parseInt(this.dataset.rating);
+                    updateStarDisplay();
+                    updateRatingText();
+                });
+                
+                star.addEventListener('mouseenter', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    highlightStars(rating);
+                });
+            });
+            
+            document.querySelector('.rating-input').addEventListener('mouseleave', function() {
+                updateStarDisplay();
+            });
+        }
+        
+        function highlightStars(rating) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+        
+        function updateStarDisplay() {
+            highlightStars(selectedRating);
+        }
+        
+        function updateRatingText() {
+            const text = document.getElementById('ratingText');
+            if (selectedRating === 0) {
+                text.textContent = 'Select a rating';
+            } else {
+                const ratings = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+                text.textContent = `${ratings[selectedRating]} (${selectedRating}/5)`;
+            }
+        }
+        
+        // Track download
+        async function trackDownload(modelId) {
+            try {
+                await fetch(`/api/models/${modelId}/download`, {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.error('Failed to track download:', error);
+            }
+        }
+        
+        // Share model
+        function shareModel() {
+            if (navigator.share && currentModel) {
+                navigator.share({
+                    title: currentModel.title,
+                    text: `Check out this AI model: ${currentModel.title}`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy URL to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Model URL copied to clipboard!');
+                });
+            }
+        }
+        
+        // Submit comment
+        async function submitComment(event) {
+            event.preventDefault();
+            
+            if (!currentUser) {
+                alert('Please log in to leave a review');
+                return;
+            }
+            
+            const commentText = document.getElementById('commentText').value.trim();
+            if (!commentText) {
+                alert('Please enter a comment');
+                return;
+            }
+            
+            if (selectedRating === 0) {
+                alert('Please select a rating');
+                return;
+            }
+            
+            try {
+                await fetch('/api/comments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model_id: currentModel.id,
+                        user_id: currentUser.id,
+                        rating: selectedRating,
+                        comment: commentText
+                    })
+                });
+                
+                // Clear form
+                document.getElementById('commentText').value = '';
+                selectedRating = 0;
+                updateStarDisplay();
+                updateRatingText();
+                
+                // Reload comments
+                loadModelDetails();
+            } catch (error) {
+                console.error('Failed to submit comment:', error);
+                alert('Failed to submit your review. Please try again later.');
+            }
+        }
+        
+        // Error handling
+        function showError(message) {
+            const container = document.getElementById('modelDetails');
+            container.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+    </script>
+</body>
+</html>

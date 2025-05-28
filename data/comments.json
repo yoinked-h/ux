@@ -1,0 +1,32 @@
+[  {
+    "id": "comment1",
+    "model_id": "1",
+    "user_id": "user2",
+    "comment": "**Amazing results!** This model produces incredibly realistic portraits.\n\n### What I loved:\n- High detail rendering\n- Fast generation times\n- Multiple style options\n\n`Highly recommended for professional use!`",
+    "rating": 5,
+    "date": 1737936000
+  },
+  {
+    "id": "comment2", 
+    "model_id": "1",
+    "user_id": "user3",
+    "comment": "Good quality but could use some improvement in lighting.",
+    "rating": 4,
+    "date": 1737849600
+  },  {
+    "id": "comment3",
+    "model_id": "3",
+    "user_id": "user1",
+    "comment": "## Best text summarization model I've used!\n\n*Highly recommended!* The accuracy is outstanding.\n\n> The summaries are concise yet comprehensive - exactly what I needed for my research project.\n\n**Rating breakdown:**\n- Accuracy: 5/5\n- Speed: 5/5\n- Ease of use: 5/5",
+    "rating": 5,
+    "date": 1737763200
+  },
+  {
+    "id": "comment4",
+    "model_id": "4",
+    "user_id": "user2", 
+    "comment": "Impressive language capabilities across multiple languages.",
+    "rating": 5,
+    "date": 1737676800
+  }
+]

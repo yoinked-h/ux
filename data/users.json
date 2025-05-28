@@ -1,0 +1,29 @@
+[
+  {
+    "id": "user1",
+    "username": "aicrafter", 
+    "email": "user1@example.com",
+    "password_hash": "hashed_password_1",
+    "join_date": 1737590400,
+    "bio": "AI enthusiast and model creator",
+    "avatar_url": "https://picsum.photos/100/100?random=10"
+  },
+  {
+    "id": "user2",
+    "username": "modelmaster",
+    "email": "user2@example.com", 
+    "password_hash": "hashed_password_2",
+    "join_date": 1737504000,
+    "bio": "Building the future with AI",
+    "avatar_url": "https://picsum.photos/100/100?random=11"
+  },
+  {
+    "id": "user3",
+    "username": "nlpguru",
+    "email": "user3@example.com",
+    "password_hash": "hashed_password_3", 
+    "join_date": 1737417600,
+    "bio": "Natural Language Processing specialist",
+    "avatar_url": "https://picsum.photos/100/100?random=12"
+  }
+]

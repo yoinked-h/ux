@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Models - AI Model Hub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo" onclick="goHome()">🤖 AI Model Hub</div>
+                <div class="nav-buttons">
+                    <a href="home.html" class="btn btn-secondary">🏠 Home</a>
+                    <button id="loginBtn" class="btn btn-primary" onclick="showAuthModal('login')">Login</button>
+                    <button id="registerBtn" class="btn btn-secondary" onclick="showAuthModal('register')">Register</button>
+                    <button id="uploadBtn" class="btn btn-primary hidden" onclick="showUploadModal()">Upload Model</button>
+                    <button id="logoutBtn" class="btn btn-secondary hidden" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Search Section -->
+    <section class="search-section">
+        <div class="container">
+            <div class="search-header">
+                <h1>🔍 Search AI Models</h1>
+                <p>Discover the perfect AI model for your project</p>
+            </div>
+            
+            <div class="search-controls">
+                <input type="text" id="searchInput" class="search-input" 
+                       placeholder="Search models by title, description, or tags...">
+                <select id="typeFilter" class="filter-select">
+                    <option value="">All Types</option>
+                </select>
+                <select id="subtypeFilter" class="filter-select">
+                    <option value="">All Subtypes</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section">
+        <div class="container">
+            <div class="results-header">
+                <div class="results-count" id="resultsCount">Loading models...</div>
+            </div>
+            
+            <div id="modelsGrid" class="models-grid">
+                <div class="loading">Loading models...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Authentication Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="authTitle">Login</h2>
+                <span class="close" onclick="closeModal('authModal')">&times;</span>
+            </div>
+            <form id="authForm">
+                <div class="form-group" id="usernameGroup">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group" id="emailGroup" style="display: none;">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Login</button>
+            </form>
+            <p class="text-center mt-1">Don't have an account? <a href="#" onclick="showAuthModal('register')">Register</a></p>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Upload New Model</h2>
+                <span class="close" onclick="closeModal('uploadModal')">&times;</span>
+            </div>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="modelTitle">Title:</label>
+                    <input type="text" id="modelTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="modelDescription">Description (Markdown supported):</label>
+                    <textarea id="modelDescription" rows="5" required 
+                              placeholder="# Model Description&#10;&#10;Describe your model here using Markdown..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="modelLink">Model Link:</label>
+                    <input type="url" id="modelLink" required 
+                           placeholder="https://huggingface.co/your-model">
+                </div>
+                <div class="form-group">
+                    <label for="modelImage">Image URL:</label>
+                    <input type="url" id="modelImage" required 
+                           placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="modelType">Type:</label>
+                    <select id="modelType" required>
+                        <option value="">Select Type</option>
+                        <option value="A">Type A</option>
+                        <option value="B">Type B</option>
+                        <option value="C">Type C</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modelSubtype">Subtype:</label>
+                    <select id="modelSubtype" required>
+                        <option value="">Select Subtype</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modelTags">Tags (press Enter to add):</label>
+                    <div class="tag-input" onclick="document.getElementById('tagInput').focus()">
+                        <input type="text" id="tagInput" placeholder="Add tags..." 
+                               style="border: none; outline: none; background: none; flex: 1;">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Upload Model</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let allModels = [];
+        let modelTypes = {};
+        let currentTags = [];
+        let isLoginMode = true;
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthState();
+            loadModelTypes();
+            loadModels();
+            setupEventListeners();
+        });
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', filterModels);
+            document.getElementById('typeFilter').addEventListener('change', filterModels);
+            document.getElementById('subtypeFilter').addEventListener('change', filterModels);
+            
+            document.getElementById('modelType').addEventListener('change', updateSubtypes);
+            document.getElementById('tagInput').addEventListener('keypress', handleTagInput);
+            
+            document.getElementById('authForm').addEventListener('submit', handleAuth);
+            document.getElementById('uploadForm').addEventListener('submit', handleUpload);
+        }
+        
+        // Navigation
+        function goHome() {
+            window.location.href = 'home.html';
+        }
+        
+        // Authentication state management
+        async function checkAuthState() {
+            try {
+                const response = await fetch('/api/current-user');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    updateUIForLoggedInUser();
+                } else {
+                    updateUIForLoggedOutUser();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                updateUIForLoggedOutUser();
+            }
+        }
+        
+        function updateUIForLoggedInUser() {
+            document.getElementById('loginBtn').classList.add('hidden');
+            document.getElementById('registerBtn').classList.add('hidden');
+            document.getElementById('uploadBtn').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+        }
+        
+        function updateUIForLoggedOutUser() {
+            document.getElementById('loginBtn').classList.remove('hidden');
+            document.getElementById('registerBtn').classList.remove('hidden');
+            document.getElementById('uploadBtn').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+        }
+        
+        // Load model types for filters
+        async function loadModelTypes() {
+            try {
+                const response = await fetch('/api/model-types');
+                modelTypes = await response.json();
+                
+                const typeFilter = document.getElementById('typeFilter');
+                Object.keys(modelTypes).forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = `Type ${type}`;
+                    typeFilter.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load model types:', error);
+            }
+        }
+        
+        // Load and display models
+        async function loadModels() {
+            try {
+                const response = await fetch('/api/models');
+                allModels = await response.json();
+                displayModels(allModels);
+            } catch (error) {
+                console.error('Failed to load models:', error);
+                document.getElementById('modelsGrid').innerHTML = 
+                    '<div class="col-span-full text-white">Failed to load models</div>';
+            }
+        }
+        
+        // Filter models based on search criteria
+        function filterModels() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const typeFilter = document.getElementById('typeFilter').value;
+            const subtypeFilter = document.getElementById('subtypeFilter').value;
+            
+            let filteredModels = allModels.filter(model => {
+                const matchesSearch = !searchTerm || 
+                    model.title.toLowerCase().includes(searchTerm) ||
+                    model.description.toLowerCase().includes(searchTerm) ||
+                    (model.tags && model.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
+                
+                const matchesType = !typeFilter || model.type === typeFilter;
+                const matchesSubtype = !subtypeFilter || model.subtype === subtypeFilter;
+                
+                return matchesSearch && matchesType && matchesSubtype;
+            });
+            
+            displayModels(filteredModels);
+            
+            // Update subtype filter based on type selection
+            if (typeFilter) {
+                updateSubtypeFilter(typeFilter);
+            } else {
+                updateSubtypeFilter(null);
+            }
+        }
+        
+        // Update subtype filter options
+        function updateSubtypeFilter(selectedType) {
+            const subtypeFilter = document.getElementById('subtypeFilter');
+            subtypeFilter.innerHTML = '<option value="">All Subtypes</option>';
+            
+            if (selectedType && modelTypes[selectedType]) {
+                modelTypes[selectedType].forEach(subtype => {
+                    const option = document.createElement('option');
+                    option.value = subtype;
+                    option.textContent = subtype;
+                    subtypeFilter.appendChild(option);
+                });
+            }
+        }
+        
+        // Display models in grid
+        function displayModels(models) {
+            const grid = document.getElementById('modelsGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            resultsCount.textContent = `${models.length} model${models.length !== 1 ? 's' : ''} found`;
+            
+            if (models.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-white">No models found matching your criteria</div>';
+                return;
+            }
+            
+            grid.innerHTML = models.map(model => createModelCard(model)).join('');
+        }
+        
+        // Create model card HTML
+        function createModelCard(model) {
+            const description = model.description.split('\n')[0].replace(/^#+\s*/, '').substring(0, 150) + '...';
+            
+            return `
+                <div class="model-card" onclick="viewModel('${model.id}')">
+                    <img src="${model.image_url}" alt="${model.title}" class="model-image" 
+                         onerror="this.src='https://via.placeholder.com/300x180?text=No+Image'">
+                    <div class="model-title">${model.title}</div>
+                    <div class="model-description">${description}</div>
+                    <div class="model-meta">
+                        <span class="model-type">${model.type}.${model.subtype}</span>
+                        <div class="model-rating">
+                            ⭐ ${model.rating || 0}
+                        </div>
+                    </div>
+                    <div class="model-stats">
+                        <span class="stat">👁️ ${model.views || 0}</span>
+                        <span class="stat">📥 ${model.downloads || 0}</span>
+                    </div>
+                    <div class="model-uploader">
+                        <img src="${model.uploader_avatar || 'https://via.placeholder.com/24x24'}" 
+                             alt="${model.uploader_username}" class="uploader-avatar"
+                             onerror="this.src='https://via.placeholder.com/24x24'">
+                        <span>by ${model.uploader_username || 'Unknown'}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Navigate to model details page
+        function viewModel(modelId) {
+            window.location.href = `model.html?id=${modelId}`;
+        }
+        
+        // Modal management
+        function showAuthModal(mode) {
+            isLoginMode = (mode === 'login');
+            updateAuthModal();
+            document.getElementById('authModal').style.display = 'block';
+        }
+        
+        function updateAuthModal() {
+            const title = document.getElementById('authTitle');
+            const emailGroup = document.getElementById('emailGroup');
+            const submitBtn = document.querySelector('#authForm button');
+            const switchText = document.getElementById('authSwitchText');
+            const switchLink = document.getElementById('authSwitchLink');
+            
+            if (isLoginMode) {
+                title.textContent = 'Login';
+                emailGroup.style.display = 'none';
+                submitBtn.textContent = 'Login';
+                switchText.textContent = "Don't have an account?";
+                switchLink.textContent = 'Register here';
+            } else {
+                title.textContent = 'Register';
+                emailGroup.style.display = 'block';
+                submitBtn.textContent = 'Register';
+                switchText.textContent = 'Already have an account?';
+                switchLink.textContent = 'Login here';
+            }
+        }
+        
+        function switchAuthMode() {
+            isLoginMode = !isLoginMode;
+            updateAuthModal();
+        }
+        
+        function showUploadModal() {
+            if (!currentUser) {
+                showAuthModal('login');
+                return;
+            }
+            document.getElementById('uploadModal').style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            // Reset forms
+            if (modalId === 'authModal') {
+                document.getElementById('authForm').reset();
+            } else if (modalId === 'uploadModal') {
+                document.getElementById('uploadForm').reset();
+                currentTags = [];
+                updateTagDisplay();
+            }
+        }
+        
+        // Authentication handling
+        async function handleAuth(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const email = isLoginMode ? null : document.getElementById('email').value;
+            
+            const endpoint = isLoginMode ? '/api/login' : '/api/register';
+            const data = isLoginMode ? { username, password } : { username, email, password };
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentUser = result.user;
+                    updateUIForLoggedInUser();
+                    closeModal('authModal');
+                    alert(`${isLoginMode ? 'Login' : 'Registration'} successful!`);
+                } else {
+                    alert(result.error || `${isLoginMode ? 'Login' : 'Registration'} failed`);
+                }
+            } catch (error) {
+                console.error('Auth error:', error);
+                alert(`${isLoginMode ? 'Login' : 'Registration'} failed`);
+            }
+        }
+        
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                currentUser = null;
+                updateUIForLoggedOutUser();
+                alert('Logged out successfully!');
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+        
+        // Upload handling
+        function updateSubtypes() {
+            const type = document.getElementById('modelType').value;
+            const subtypeSelect = document.getElementById('modelSubtype');
+            
+            subtypeSelect.innerHTML = '<option value="">Select Subtype</option>';
+            
+            if (type && modelTypes[type]) {
+                modelTypes[type].forEach(subtype => {
+                    const option = document.createElement('option');
+                    option.value = subtype;
+                    option.textContent = subtype;
+                    subtypeSelect.appendChild(option);
+                });
+            }
+        }
+        
+        function handleTagInput(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const input = event.target;
+                const tag = input.value.trim();
+                
+                if (tag && !currentTags.includes(tag)) {
+                    currentTags.push(tag);
+                    input.value = '';
+                    updateTagDisplay();
+                }
+            }
+        }
+        
+        function updateTagDisplay() {
+            const tagInput = document.querySelector('.tag-input');
+            const input = document.getElementById('tagInput');
+            
+            // Remove existing tags
+            const existingTags = tagInput.querySelectorAll('.tag');
+            existingTags.forEach(tag => tag.remove());
+            
+            // Add current tags
+            currentTags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'tag';
+                tagElement.innerHTML = `${tag} <span class="tag-remove" onclick="removeTag('${tag}')">&times;</span>`;
+                tagInput.insertBefore(tagElement, input);
+            });
+        }
+        
+        function removeTag(tag) {
+            currentTags = currentTags.filter(t => t !== tag);
+            updateTagDisplay();
+        }
+        
+        async function handleUpload(event) {
+            event.preventDefault();
+            
+            const formData = {
+                title: document.getElementById('modelTitle').value,
+                description: document.getElementById('modelDescription').value,
+                model_link: document.getElementById('modelLink').value,
+                image_url: document.getElementById('modelImage').value,
+                type: document.getElementById('modelType').value,
+                subtype: document.getElementById('modelSubtype').value,
+                tags: currentTags
+            };
+            
+            try {
+                const response = await fetch('/api/models', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Model uploaded successfully!');
+                    closeModal('uploadModal');
+                    loadModels(); // Refresh the models list
+                } else {
+                    alert(result.error || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Upload failed');
+            }
+        }
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

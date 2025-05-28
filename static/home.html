@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Hub - Share & Discover AI Models</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo" onclick="goHome()">🤖 AI Model Hub</div>
+                <div class="nav-buttons">
+                    <a href="search.html" class="btn btn-secondary">🔍 Search Models</a>
+                    <button id="loginBtn" class="btn btn-primary" onclick="showAuthModal('login')">Login</button>
+                    <button id="registerBtn" class="btn btn-secondary" onclick="showAuthModal('register')">Register</button>
+                    <button id="uploadBtn" class="btn btn-primary hidden" onclick="showUploadModal()">Upload Model</button>
+                    <button id="logoutBtn" class="btn btn-secondary hidden" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Discover Amazing AI Models</h1>
+            <p>Share, explore, and collaborate on cutting-edge artificial intelligence models</p>
+            <div class="hero-actions">
+                <a href="search.html" class="btn btn-primary">🔍 Explore Models</a>
+                <button class="btn btn-secondary" onclick="showAuthModal('register')">Join the Community</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Models Section -->
+    <section class="section">
+        <div class="container">
+            <h2>🏆 Top Models</h2>
+            <div class="models-scroll">
+                <div id="topModelsContainer" class="models-container">
+                    <div class="loading">Loading top models...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="feature">
+                <div class="feature-icon">🚀</div>
+                <h3>Easy Sharing</h3>
+                <p>Upload and share your AI models with the community in just a few clicks</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔍</div>
+                <h3>Smart Discovery</h3>
+                <p>Find the perfect model for your project with our advanced search and filtering</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⭐</div>
+                <h3>Community Reviews</h3>
+                <p>Read reviews and ratings from other developers to make informed decisions</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Detailed Analytics</h3>
+                <p>Track downloads, views, and performance metrics for your models</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modals and existing functionality will be added via JavaScript -->
+    
+    <script>
+        let currentUser = null;
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthState();
+            loadTopModels();
+        });
+        
+        // Navigation
+        function goHome() {
+            window.location.href = '/';
+        }
+        
+        // Authentication state management
+        async function checkAuthState() {
+            try {
+                const response = await fetch('/api/current-user');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    updateUIForLoggedInUser();
+                } else {
+                    updateUIForLoggedOutUser();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                updateUIForLoggedOutUser();
+            }
+        }
+        
+        function updateUIForLoggedInUser() {
+            document.getElementById('loginBtn').classList.add('hidden');
+            document.getElementById('registerBtn').classList.add('hidden');
+            document.getElementById('uploadBtn').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+        }
+        
+        function updateUIForLoggedOutUser() {
+            document.getElementById('loginBtn').classList.remove('hidden');
+            document.getElementById('registerBtn').classList.remove('hidden');
+            document.getElementById('uploadBtn').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+        }
+        
+        // Load top models for horizontal scroll
+        async function loadTopModels() {
+            try {
+                const response = await fetch('/api/top_models');
+                const models = await response.json();
+                
+                const container = document.getElementById('topModelsContainer');
+                
+                if (models.length === 0) {
+                    container.innerHTML = '<div style="color: white; text-align: center; width: 100%;">No models available yet. Be the first to upload!</div>';
+                    return;
+                }
+                
+                container.innerHTML = models.map(model => createModelCard(model)).join('');
+            } catch (error) {
+                console.error('Failed to load top models:', error);
+                document.getElementById('topModelsContainer').innerHTML = 
+                    '<div style="color: white; text-align: center; width: 100%;">Failed to load models</div>';
+            }
+        }
+        
+        // Create model card HTML
+        function createModelCard(model) {
+            const description = model.description.split('\n')[0].replace(/^#+\s*/, '').substring(0, 100) + '...';
+            
+            return `
+                <div class="model-card" onclick="viewModel('${model.id}')">
+                    <img src="${model.image_url}" alt="${model.title}" class="model-image" 
+                         onerror="this.src='https://via.placeholder.com/300x160?text=No+Image'">
+                    <div class="model-title">${model.title}</div>
+                    <div class="model-description">${description}</div>
+                    <div class="model-meta">
+                        <span class="model-type">${model.type}.${model.subtype}</span>
+                        <div class="model-rating">
+                            ⭐ ${model.rating || 0}
+                        </div>
+                    </div>
+                    <div class="model-stats">
+                        <span class="stat">👁️ ${model.views || 0}</span>
+                        <span class="stat">📥 ${model.downloads || 0}</span>
+                        <span class="stat">👤 ${model.uploader_username || 'Unknown'}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Navigate to model details page
+        function viewModel(modelId) {
+            window.location.href = `model.html?id=${modelId}`;
+        }
+        
+        // Authentication modals (placeholder - we'll implement these)
+        function showAuthModal(type) {
+            // For now, redirect to search page where full auth is implemented
+            window.location.href = 'search.html';
+        }
+        
+        function showUploadModal() {
+            // For now, redirect to search page where upload is implemented
+            window.location.href = 'search.html';
+        }
+        
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                currentUser = null;
+                updateUIForLoggedOutUser();
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+    </script>
+</body>
+</html>

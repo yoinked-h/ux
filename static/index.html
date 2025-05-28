@@ -3,91 +3,591 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        #card-container {
-            display: flex;
-            overflow-x: auto;
-            padding: 20px;
-            gap: 16px;
-        }
-        .card {
-            position: relative;
-            flex: 0 0 200px;
-            height: 300px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .card .version {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(0,0,0,0.6);
-            color: #fff;
-            padding: 4px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        .card .overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 8px;
-            background: rgba(0,0,0,0.6);
-            color: #fff;
-        }
-        .card .overlay .username {
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-    </style>
+    <title>AI Model Hub - Share & Discover AI Models</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Welcome to the Static Page</h1>
-    <p>This is a simple static HTML page.</p>
-    <div id="card-container"></div>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">🤖 AI Model Hub</div>
+                <div class="nav-buttons">
+                    <div id="auth-buttons">
+                        <button class="btn btn-secondary" onclick="showLoginModal()">Login</button>
+                        <button class="btn btn-primary" onclick="showRegisterModal()">Register</button>
+                    </div>
+                    <div id="user-menu" class="hidden">
+                        <div class="user-info">
+                            <img id="user-avatar" class="user-avatar" src="" alt="User">
+                            <span id="username"></span>
+                        </div>
+                        <button class="btn btn-primary" onclick="showUploadModal()">Upload Model</button>
+                        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <section class="hero">
+                <h1>Discover & Share AI Models</h1>
+                <p>The premier platform for AI researchers and enthusiasts to share cutting-edge models</p>
+            </section>
+
+            <section class="search-section">
+                <div class="search-row">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search models...">
+                    <select id="type-filter">
+                        <option value="">All Types</option>
+                        <option value="A">Type A</option>
+                        <option value="B">Type B</option>
+                        <option value="C">Type C</option>
+                    </select>
+                    <select id="subtype-filter">
+                        <option value="">All Subtypes</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="searchModels()">Search</button>
+                </div>
+            </section>
+
+            <section class="models-grid" id="models-grid">
+                <!-- Models will be loaded here -->
+            </section>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login</h2>
+                <button class="close-btn" onclick="closeModal('login-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="login-username" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="login-password" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <div id="login-error" class="error hidden"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Register</h2>
+                <button class="close-btn" onclick="closeModal('register-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="register-form">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="register-username" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="register-email" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="register-password" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                    <div id="register-error" class="error hidden"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Model Modal -->
+    <div id="upload-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Upload Model</h2>
+                <button class="close-btn" onclick="closeModal('upload-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="upload-form">
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" id="upload-title" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description (Markdown supported)</label>
+                        <textarea id="upload-description" class="form-input" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Model Link</label>
+                        <input type="url" id="upload-model-link" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Image URL</label>
+                        <input type="url" id="upload-image-url" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Type</label>
+                        <select id="upload-type" class="form-input" required>
+                            <option value="">Select Type</option>
+                            <option value="A">Type A</option>
+                            <option value="B">Type B</option>
+                            <option value="C">Type C</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Subtype</label>
+                        <select id="upload-subtype" class="form-input" required>
+                            <option value="">Select Subtype</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tags (comma separated)</label>
+                        <input type="text" id="upload-tags" class="form-input" placeholder="ai, machine learning, nlp">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload Model</button>
+                    <div id="upload-error" class="error hidden"></div>
+                    <div id="upload-success" class="success hidden"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Detail Modal -->
+    <div id="model-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="model-detail-title"></h2>
+                <button class="close-btn" onclick="closeModal('model-modal')">&times;</button>
+            </div>
+            <div class="modal-body" id="model-detail-content">
+                <!-- Model details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Fetch model data and render cards
-        fetch('/api/models')
-          .then(response => response.json())
-          .then(models => {
-            const container = document.getElementById('card-container');
-            models.forEach(item => {
-              const card = document.createElement('div');
-              card.className = 'card';
-              // Image
-              const img = document.createElement('img');
-              img.src = item.imgUrl;
-              img.alt = item.title;
-              card.appendChild(img);
-              // Version badge
-              const version = document.createElement('div');
-              version.className = 'version';
-              version.textContent = item.version;
-              card.appendChild(version);
-              // Overlay with username and title
-              const overlay = document.createElement('div');
-              overlay.className = 'overlay';
-              const username = document.createElement('div');
-              username.className = 'username';
-              username.textContent = item.description; // using description as username
-              const title = document.createElement('div');
-              title.className = 'title';
-              title.textContent = item.title;
-              overlay.appendChild(username);
-              overlay.appendChild(title);
-              card.appendChild(overlay);
-              container.appendChild(card);
+        // State management
+        let currentUser = null;
+        let allModels = [];
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadModels();
+            setupEventListeners();
+        });
+        
+        // Authentication functions
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/current-user');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    updateAuthUI();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            }
+        }
+        
+        function updateAuthUI() {
+            const authButtons = document.getElementById('auth-buttons');
+            const userMenu = document.getElementById('user-menu');
+            
+            if (currentUser) {
+                authButtons.classList.add('hidden');
+                userMenu.classList.remove('hidden');
+                document.getElementById('username').textContent = currentUser.username;
+                document.getElementById('user-avatar').src = currentUser.avatar_url || 'https://picsum.photos/32/32?random=1';
+            } else {
+                authButtons.classList.remove('hidden');
+                userMenu.classList.add('hidden');
+            }
+        }
+        
+        // Modal functions
+        function showLoginModal() {
+            document.getElementById('login-modal').style.display = 'block';
+        }
+        
+        function showRegisterModal() {
+            document.getElementById('register-modal').style.display = 'block';
+        }
+        
+        function showUploadModal() {
+            if (!currentUser) {
+                alert('Please login to upload models');
+                return;
+            }
+            document.getElementById('upload-modal').style.display = 'block';
+            loadModelTypes();
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            // Clear forms
+            const form = document.querySelector(`#${modalId} form`);
+            if (form) form.reset();
+            // Hide error messages
+            const error = document.querySelector(`#${modalId} .error`);
+            if (error) error.classList.add('hidden');
+        }
+        
+        // Form submissions
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    currentUser = data.user;
+                    updateAuthUI();
+                    closeModal('login-modal');
+                } else {
+                    document.getElementById('login-error').textContent = data.error;
+                    document.getElementById('login-error').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Login failed:', error);
+            }
+        });
+        
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    currentUser = data.user;
+                    updateAuthUI();
+                    closeModal('register-modal');
+                } else {
+                    document.getElementById('register-error').textContent = data.error;
+                    document.getElementById('register-error').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Registration failed:', error);
+            }
+        });
+        
+        document.getElementById('upload-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = {
+                title: document.getElementById('upload-title').value,
+                description: document.getElementById('upload-description').value,
+                model_link: document.getElementById('upload-model-link').value,
+                image_url: document.getElementById('upload-image-url').value,
+                type: document.getElementById('upload-type').value,
+                subtype: document.getElementById('upload-subtype').value,
+                tags: document.getElementById('upload-tags').value.split(',').map(t => t.trim()).filter(t => t)
+            };
+            
+            try {
+                const response = await fetch('/api/models', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById('upload-success').textContent = 'Model uploaded successfully!';
+                    document.getElementById('upload-success').classList.remove('hidden');
+                    setTimeout(() => {
+                        closeModal('upload-modal');
+                        loadModels(); // Refresh models
+                    }, 2000);
+                } else {
+                    document.getElementById('upload-error').textContent = data.error;
+                    document.getElementById('upload-error').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Upload failed:', error);
+            }
+        });
+        
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                currentUser = null;
+                updateAuthUI();
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+        
+        // Model functions
+        async function loadModels() {
+            try {
+                const response = await fetch('/api/models');
+                allModels = await response.json();
+                renderModels(allModels);
+            } catch (error) {
+                console.error('Failed to load models:', error);
+            }
+        }
+        
+        function renderModels(models) {
+            const grid = document.getElementById('models-grid');
+            grid.innerHTML = '';
+            
+            models.forEach(model => {
+                const card = createModelCard(model);
+                grid.appendChild(card);
             });
-          })
-          .catch(err => console.error('Error loading models:', err));
+        }
+        
+        function createModelCard(model) {
+            const card = document.createElement('div');
+            card.className = 'model-card';
+            card.onclick = () => showModelDetail(model.id);
+            
+            const rating = Math.round(model.rating || 0);
+            const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+            
+            card.innerHTML = `
+                <img src="${model.image_url}" alt="${model.title}" class="model-image">
+                <div class="model-content">
+                    <div class="model-header">
+                        <div>
+                            <div class="model-title">${model.title}</div>
+                            <div class="rating">${stars} (${model.rating || 0})</div>
+                        </div>
+                        <div class="model-type">${model.type}.${model.subtype}</div>
+                    </div>
+                    <div class="model-description">${model.description_preview || model.description.substring(0, 100) + '...'}</div>
+                    <div class="model-footer">
+                        <div class="model-author">
+                            <img src="${model.uploader_avatar || 'https://picsum.photos/32/32?random=1'}" 
+                                 alt="${model.uploader_username}" class="author-avatar">
+                            <span>${model.uploader_username || 'Unknown'}</span>
+                        </div>
+                        <div class="model-stats">
+                            <div class="stat">👁️ ${model.views || 0}</div>
+                            <div class="stat">⬇️ ${model.downloads || 0}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        async function showModelDetail(modelId) {
+            try {
+                const response = await fetch(`/api/models/${modelId}`);
+                const model = await response.json();
+                
+                document.getElementById('model-detail-title').textContent = model.title;
+                
+                const content = document.getElementById('model-detail-content');
+                content.innerHTML = `
+                    <img src="${model.image_url}" alt="${model.title}" style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem;">
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Type:</strong> ${model.type}.${model.subtype}
+                    </div>
+                      <div style="margin-bottom: 1rem;">
+                        <strong>Description:</strong><br>
+                        <div style="border: 1px solid #e5e7eb; padding: 1rem; border-radius: 8px; background: #f9fafb;">
+                            ${model.description_html || model.description}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <a href="${model.model_link}" target="_blank" class="btn btn-primary" onclick="downloadModel('${model.id}')">
+                            Download Model
+                        </a>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Stats:</strong> ${model.views || 0} views, ${model.downloads || 0} downloads
+                    </div>
+                    
+                    <div class="comments-section">
+                        <h3>Comments & Reviews</h3>
+                        ${currentUser ? `
+                            <form id="comment-form" style="margin: 1rem 0;">
+                                <div class="form-group">
+                                    <label class="form-label">Rating</label>
+                                    <select id="comment-rating" class="form-input">
+                                        <option value="0">No rating</option>
+                                        <option value="1">1 star</option>
+                                        <option value="2">2 stars</option>
+                                        <option value="3">3 stars</option>
+                                        <option value="4">4 stars</option>
+                                        <option value="5">5 stars</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <textarea id="comment-text" class="form-input" placeholder="Write your comment..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add Comment</button>
+                            </form>
+                        ` : '<p>Login to add comments</p>'}
+                        
+                        <div id="comments-list">
+                            ${model.comments ? model.comments.map(comment => `
+                                <div class="comment">
+                                    <img src="${comment.avatar_url || 'https://picsum.photos/40/40?random=1'}" 
+                                         alt="${comment.username}" class="comment-avatar">
+                                    <div class="comment-content">
+                                        <div class="comment-author">${comment.username} ${comment.rating > 0 ? '★'.repeat(comment.rating) : ''}</div>
+                                        <div class="comment-text">${comment.comment_html || comment.comment}</div>
+                                    </div>
+                                </div>
+                            `).join('') : '<p>No comments yet</p>'}
+                        </div>
+                    </div>
+                `;
+                
+                // Add comment form handler
+                const commentForm = document.getElementById('comment-form');
+                if (commentForm) {
+                    commentForm.addEventListener('submit', async function(e) {
+                        e.preventDefault();
+                        await addComment(modelId);
+                    });
+                }
+                
+                document.getElementById('model-modal').style.display = 'block';
+            } catch (error) {
+                console.error('Failed to load model details:', error);
+            }
+        }
+        
+        async function addComment(modelId) {
+            const rating = parseInt(document.getElementById('comment-rating').value);
+            const comment = document.getElementById('comment-text').value;
+            
+            try {
+                const response = await fetch(`/api/models/${modelId}/comments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment, rating })
+                });
+                
+                if (response.ok) {
+                    // Refresh model details
+                    showModelDetail(modelId);
+                }
+            } catch (error) {
+                console.error('Failed to add comment:', error);
+            }
+        }
+        
+        async function downloadModel(modelId) {
+            try {
+                await fetch(`/api/models/${modelId}/download`, { method: 'POST' });
+            } catch (error) {
+                console.error('Failed to count download:', error);
+            }
+        }
+        
+        // Search and filter functions
+        function searchModels() {
+            const search = document.getElementById('search-input').value;
+            const type = document.getElementById('type-filter').value;
+            const subtype = document.getElementById('subtype-filter').value;
+            
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (type) params.append('type', type);
+            if (subtype) params.append('subtype', subtype);
+            
+            fetch(`/api/models?${params}`)
+                .then(response => response.json())
+                .then(models => renderModels(models))
+                .catch(error => console.error('Search failed:', error));
+        }
+        
+        async function loadModelTypes() {
+            try {
+                const response = await fetch('/api/model-types');
+                const types = await response.json();
+                
+                // Update upload form subtypes when type changes
+                document.getElementById('upload-type').addEventListener('change', function() {
+                    const selectedType = this.value;
+                    const subtypeSelect = document.getElementById('upload-subtype');
+                    subtypeSelect.innerHTML = '<option value="">Select Subtype</option>';
+                    
+                    if (selectedType && types[selectedType]) {
+                        types[selectedType].forEach(subtype => {
+                            const option = document.createElement('option');
+                            option.value = subtype;
+                            option.textContent = subtype;
+                            subtypeSelect.appendChild(option);
+                        });
+                    }
+                });
+                
+                // Update filter subtypes when type changes
+                document.getElementById('type-filter').addEventListener('change', function() {
+                    const selectedType = this.value;
+                    const subtypeSelect = document.getElementById('subtype-filter');
+                    subtypeSelect.innerHTML = '<option value="">All Subtypes</option>';
+                    
+                    if (selectedType && types[selectedType]) {
+                        types[selectedType].forEach(subtype => {
+                            const option = document.createElement('option');
+                            option.value = subtype;
+                            option.textContent = subtype;
+                            subtypeSelect.appendChild(option);
+                        });
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Failed to load model types:', error);
+            }
+        }
+        
+        function setupEventListeners() {
+            // Close modals when clicking outside
+            window.addEventListener('click', function(e) {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Search on enter
+            document.getElementById('search-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchModels();
+                }
+            });
+        }
     </script>
 </body>
 </html>

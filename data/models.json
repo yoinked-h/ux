@@ -1,0 +1,124 @@
+[
+  {
+    "id": "1",
+    "title": "Realistic Portrait Generator",
+    "description": "# Realistic Portrait Generator\n\nA **high-quality** portrait generation model with excellent facial detail rendering.\n\n## Features\n\n- High resolution output\n- Multiple art styles\n- Real-time generation\n\n### Usage\n\n```python\nfrom portrait_gen import PortraitGenerator\nmodel = PortraitGenerator()\nresult = model.generate(prompt=\"realistic portrait\")\n```\n\nFor more information, visit [our documentation](https://example.com/docs).",
+    "model_link": "https://example.com/models/portrait-gen-v1",
+    "image_url": "https://picsum.photos/400/600?random=1",
+    "type": "A",
+    "subtype": "A.1",
+    "uploader_id": "user1",
+    "upload_date": 1737936000,
+    "views": 1251,
+    "downloads": 340,
+    "rating": 4.7,
+    "tags": [
+      "portrait",
+      "realistic",
+      "faces"
+    ],
+    "description_html": "<h1>Realistic Portrait Generator</h1>\n<p>A <strong>high-quality</strong> portrait generation model with excellent facial detail rendering.</p>\n<h2>Features</h2>\n<ul>\n<li>High resolution output</li>\n<li>Multiple art styles</li>\n<li>Real-time generation</li>\n</ul>\n<h3>Usage</h3>\n<pre><code class=\"language-python\">from portrait_gen import PortraitGenerator\nmodel = PortraitGenerator()\nresult = model.generate(prompt=&quot;realistic portrait&quot;)\n</code></pre>\n<p>For more information, visit <a href=\"https://example.com/docs\">our documentation</a>.</p>",
+    "uploader_username": "aicrafter",
+    "uploader_avatar": "https://picsum.photos/100/100?random=10",
+    "comments": [
+      {
+        "id": "comment1",
+        "model_id": "1",
+        "user_id": "user2",
+        "comment": "**Amazing results!** This model produces incredibly realistic portraits.\n\n### What I loved:\n- High detail rendering\n- Fast generation times\n- Multiple style options\n\n`Highly recommended for professional use!`",
+        "rating": 5,
+        "date": 1737936000,
+        "username": "modelmaster",
+        "avatar_url": "https://picsum.photos/100/100?random=11",
+        "comment_html": "<p><strong>Amazing results!</strong> This model produces incredibly realistic portraits.</p>\n<h3>What I loved:</h3>\n<ul>\n<li>High detail rendering</li>\n<li>Fast generation times</li>\n<li>Multiple style options</li>\n</ul>\n<p><code>Highly recommended for professional use!</code></p>"
+      },
+      {
+        "id": "comment2",
+        "model_id": "1",
+        "user_id": "user3",
+        "comment": "Good quality but could use some improvement in lighting.",
+        "rating": 4,
+        "date": 1737849600,
+        "username": "nlpguru",
+        "avatar_url": "https://picsum.photos/100/100?random=12",
+        "comment_html": "<p>Good quality but could use some improvement in lighting.</p>"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "title": "Landscape Scene Creator",
+    "description": "Create stunning natural landscapes with this advanced terrain generation model",
+    "model_link": "https://example.com/models/landscape-v2",
+    "image_url": "https://picsum.photos/400/600?random=2",
+    "type": "A",
+    "subtype": "A.2",
+    "uploader_id": "user2",
+    "upload_date": 1737849600,
+    "views": 890,
+    "downloads": 210,
+    "rating": 4.3,
+    "tags": [
+      "landscape",
+      "nature",
+      "terrain"
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Text Summarizer Pro",
+    "description": "## Text Summarizer Pro\n\nAdvanced natural language processing model for intelligent text summarization.\n\n### Key Benefits\n\n1. **Fast processing** - Summarizes documents in seconds\n2. **High accuracy** - Maintains context and key information\n3. **Multi-format support** - Works with various document types\n\n> \"This is the best summarization model I've used!\" - *Happy User*\n\n#### Technical Specifications\n\n- Model size: 1.2B parameters\n- Input limit: 10,000 tokens\n- Languages: 50+\n\n```bash\npip install text-summarizer-pro\n```",
+    "model_link": "https://example.com/models/text-sum-pro",
+    "image_url": "https://picsum.photos/400/600?random=3",
+    "type": "B",
+    "subtype": "B.1",
+    "uploader_id": "user3",
+    "upload_date": 1737763200,
+    "views": 2100,
+    "downloads": 580,
+    "rating": 4.9,
+    "tags": [
+      "nlp",
+      "text",
+      "summarization"
+    ]
+  },
+  {
+    "id": "4",
+    "title": "Ultimate Language Model",
+    "description": "The most advanced conversational AI model with multi-language support",
+    "model_link": "https://example.com/models/ultimate-lang",
+    "image_url": "https://picsum.photos/400/600?random=4",
+    "type": "B",
+    "subtype": "B.final",
+    "uploader_id": "user1",
+    "upload_date": 1737676800,
+    "views": 3200,
+    "downloads": 920,
+    "rating": 4.8,
+    "tags": [
+      "language",
+      "conversation",
+      "multilingual"
+    ]
+  },
+  {
+    "id": "5",
+    "title": "Audio Classifier Lite",
+    "description": "Lightweight model for real-time audio classification and sound recognition",
+    "model_link": "https://example.com/models/audio-class-lite",
+    "image_url": "https://picsum.photos/400/600?random=5",
+    "type": "C",
+    "subtype": "C.1",
+    "uploader_id": "user2",
+    "upload_date": 1737590400,
+    "views": 670,
+    "downloads": 125,
+    "rating": 4.1,
+    "tags": [
+      "audio",
+      "classification",
+      "real-time"
+    ]
+  }
+]
